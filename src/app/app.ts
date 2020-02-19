@@ -97,6 +97,10 @@ $(function () {
         return { x: pt.j * Cell.CELL_WIDTH, y: pt.i * Cell.CELL_WIDTH }
     }
 
+    function allValsFalse(myMap:Object){
+        _.values(myMap).forEach( (val) => { if(val) return false } )
+        return true
+    }
 
     function renderGrid(ctx: CanvasRenderingContext2D) {
         // ctx.clearRect(0, 0, 400, 400)
@@ -323,7 +327,9 @@ $(function () {
 
         //splitting this achieves frictionless surface sliding
         if (checkMoveIsLegal({x:nextPos.x,y:player.y})) { //check new x
-            lastVel.x=Math.max(0,nextPos.x-player.x-PLAYER_SPEED/10)
+            
+            if(powerCharge>5|| allValsFalse(controlKeys))
+                lastVel.x=Math.max(0,nextPos.x-player.x)
 
             powerCharge-=Math.abs(playerDelta.x)
             player.x = nextPos.x
@@ -335,7 +341,8 @@ $(function () {
         }
 
         if (checkMoveIsLegal({x:player.x,y:nextPos.y})) { //check new y
-            lastVel.y=Math.max(0,nextPos.y-player.y-PLAYER_SPEED/10)
+            if(powerCharge>5|| allValsFalse(controlKeys))
+                lastVel.y=Math.max(0,nextPos.y-player.y)
 
             powerCharge-=Math.abs(playerDelta.y)
             player.y = nextPos.y

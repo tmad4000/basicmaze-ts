@@ -1,0 +1,13 @@
+import './vendor';
+import $ from 'jquery';
+
+const a = 1;
+console.log($, '');
+console.log("hi test")
+
+
+if (true) {
+}
+
+alert(
+    document.getElementById("bootn").innerHTML)

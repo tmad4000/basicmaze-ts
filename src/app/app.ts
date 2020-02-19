@@ -126,7 +126,9 @@ $(function () {
     let player: Point2D = idXToPos({ i: 1, j: 1 });
     let tension=0;
     let powerCharge=0;
-    const PLAYER_SPEED = 3
+    const PLAYER_SPEED = 1
+    let lastVel:Point2D={x:0,y:0}
+
 
 
     // let player: Point2D = { x: 100, y: 100 }
@@ -286,11 +288,22 @@ $(function () {
 
         let playerDelta: Point2D = { x: 0, y: 0 }
 
-        if (controlKeys.left) playerDelta.x += -(PLAYER_SPEED+powerCharge/10);
-        if (controlKeys.up) playerDelta.y += -(PLAYER_SPEED+powerCharge/10);
-        if (controlKeys.right) playerDelta.x += +(PLAYER_SPEED+powerCharge/10);
-        if (controlKeys.down) playerDelta.y += +(PLAYER_SPEED+powerCharge/10);
+        
+        if( !controlKeys.left && !controlKeys.right ) 
+            playerDelta.x=lastVel.x
+        else {
+            if (controlKeys.left) playerDelta.x += -(PLAYER_SPEED+powerCharge/10);
+            if (controlKeys.right) playerDelta.x += +(PLAYER_SPEED+powerCharge/10);
+        }
 
+        if( !controlKeys.up && !controlKeys.down ) 
+            playerDelta.y=lastVel.y
+        else {
+            if (controlKeys.up) playerDelta.y += -(PLAYER_SPEED+powerCharge/10);
+            if (controlKeys.down) playerDelta.y += +(PLAYER_SPEED+powerCharge/10);
+
+        }
+        
         
         powerCharge-=.5 //cooldown rate
         powerCharge=Math.max(powerCharge,0);
@@ -310,17 +323,22 @@ $(function () {
 
         //splitting this achieves frictionless surface sliding
         if (checkMoveIsLegal({x:nextPos.x,y:player.y})) { //check new x
-            player.x = nextPos.x
-            powerCharge-=Math.abs(playerDelta.x)
+            lastVel.x=Math.max(0,nextPos.x-player.x-PLAYER_SPEED/10)
 
+            powerCharge-=Math.abs(playerDelta.x)
+            player.x = nextPos.x
+            
+            
         }
         else {
             tension+=1
         }
 
         if (checkMoveIsLegal({x:player.x,y:nextPos.y})) { //check new y
-            player.y = nextPos.y
+            lastVel.y=Math.max(0,nextPos.y-player.y-PLAYER_SPEED/10)
+
             powerCharge-=Math.abs(playerDelta.y)
+            player.y = nextPos.y
         }
         else {
         tension+=1 

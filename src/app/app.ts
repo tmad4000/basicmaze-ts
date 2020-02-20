@@ -145,7 +145,7 @@ $(function () {
     let powerCharge = 0;
     const PLAYER_SPEED = 2
 
-    let playerVel: Point2D = { x: 0, y: 0 }
+    let playerVel: Point2D = { x: 3, y: 3 }
 
 
 
@@ -309,7 +309,7 @@ $(function () {
         playerDesiredDelta.y = playerVel.y
 
 
-        // if (playerVel.x < 20) {
+        if (Math.abs(playerVel.x) < 5) {
             if (!controlKeys.left && !controlKeys.right) { 
 
 
@@ -319,9 +319,9 @@ $(function () {
                 if (controlKeys.left) playerDesiredDelta.x += -(PLAYER_SPEED + powerCharge / 10);
                 if (controlKeys.right) playerDesiredDelta.x += +(PLAYER_SPEED + powerCharge / 10);
             }
-        // }
+        }
 
-        // if (playerVel.y < 20) {
+        if (Math.abs(playerVel.y) < 5) {
 
             if (!controlKeys.up && !controlKeys.down) { }
             else {
@@ -329,11 +329,11 @@ $(function () {
                 if (controlKeys.down) playerDesiredDelta.y += +(PLAYER_SPEED + powerCharge / 10);
 
             }
-        // }
+        }
 
 
-        console.log(powerCharge, playerVel, controlKeys)
-        console.log(playerDesiredDelta)
+        console.log( playerVel)
+        // console.log(playerDesiredDelta)
 
 
         powerCharge -= .5 //cooldown rate
@@ -355,9 +355,9 @@ $(function () {
         //splitting this achieves frictionless surface sliding
         if (checkMoveIsLegal({ x: nextPos.x, y: player.y })) { //check new x
 
-            if (powerCharge > 0 || allValsFalse(controlKeys))
+            // if (powerCharge > 0 || allValsFalse(controlKeys))
                 // if (powerCharge > 0 || allValsFalse(controlKeys))
-                playerVel.x = Math.max(0, nextPos.x - player.x)
+                // playerVel.x = Math.max(0, nextPos.x - player.x)
 
             powerCharge -= Math.abs(playerDesiredDelta.x)
             player.x = nextPos.x
@@ -370,8 +370,8 @@ $(function () {
         }
 
         if (checkMoveIsLegal({ x: player.x, y: nextPos.y })) { //check new y
-            if (powerCharge > 0 || allValsFalse(controlKeys))
-                playerVel.y = Math.max(0, nextPos.y - player.y)
+            // if (powerCharge > 0 || allValsFalse(controlKeys))
+                // playerVel.y = Math.max(0, nextPos.y - player.y)
 
             powerCharge -= Math.abs(playerDesiredDelta.y)
             player.y = nextPos.y

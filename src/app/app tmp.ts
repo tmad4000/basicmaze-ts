@@ -143,7 +143,7 @@ $(function () {
     let player: Point2D = idXToPos({ i: 1, j: 1 });
     let tension = 0;
     let powerCharge = 0;
-    const PLAYER_SPEED = 2
+    const PLAYER_SPEED = 3
 
     let playerVel: Point2D = { x: 0, y: 0 }
 
@@ -289,6 +289,7 @@ $(function () {
         //render player
         ctx.fillStyle = "#FFFF00";
         ctx.fillRect(player.x - 5 - powerCharge / 10 / 2, player.y - 5 - powerCharge / 10 / 2, 10 + powerCharge / 10, 10 + powerCharge / 10);
+        console.log(powerCharge, playerVel, controlKeys)
 
     }
 
@@ -304,18 +305,9 @@ $(function () {
 
         let playerDesiredDelta: Point2D = { x: 0, y: 0 }
 
-
-        playerDesiredDelta.x = playerVel.x
-        playerDesiredDelta.y = playerVel.y
-
-
         // if (playerVel.x < 20) {
-            if (!controlKeys.left && !controlKeys.right) { 
-
-
-            }
+            if (!controlKeys.left && !controlKeys.right) { }
             else {
-
                 if (controlKeys.left) playerDesiredDelta.x += -(PLAYER_SPEED + powerCharge / 10);
                 if (controlKeys.right) playerDesiredDelta.x += +(PLAYER_SPEED + powerCharge / 10);
             }
@@ -331,9 +323,8 @@ $(function () {
             }
         // }
 
-
-        console.log(powerCharge, playerVel, controlKeys)
-        console.log(playerDesiredDelta)
+        playerDesiredDelta.x = playerVel.x
+        playerDesiredDelta.y = playerVel.y
 
 
         powerCharge -= .5 //cooldown rate
@@ -355,8 +346,8 @@ $(function () {
         //splitting this achieves frictionless surface sliding
         if (checkMoveIsLegal({ x: nextPos.x, y: player.y })) { //check new x
 
-            if (powerCharge > 0 || allValsFalse(controlKeys))
-                // if (powerCharge > 0 || allValsFalse(controlKeys))
+            if (powerCharge > 20 || allValsFalse(controlKeys))
+                // if (powerCharge > 20 || allValsFalse(controlKeys))
                 playerVel.x = Math.max(0, nextPos.x - player.x)
 
             powerCharge -= Math.abs(playerDesiredDelta.x)
@@ -370,7 +361,7 @@ $(function () {
         }
 
         if (checkMoveIsLegal({ x: player.x, y: nextPos.y })) { //check new y
-            if (powerCharge > 0 || allValsFalse(controlKeys))
+            if (powerCharge > 20 || allValsFalse(controlKeys))
                 playerVel.y = Math.max(0, nextPos.y - player.y)
 
             powerCharge -= Math.abs(playerDesiredDelta.y)
@@ -381,9 +372,7 @@ $(function () {
             playerVel.y *= -1
 
         }
-
-        const CHARGE_TENSION_MULTIPLIER = 3
-        powerCharge += CHARGE_TENSION_MULTIPLIER * tension
+        powerCharge += 3 * tension
 
 
         objs.forEach((o, i) => {

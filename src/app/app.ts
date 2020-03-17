@@ -136,7 +136,6 @@ $(function () {
 
     }
 
-
     function renderCenteredRect(ctrPt: Point2D, radiusWidth: number, ctx: CanvasRenderingContext2D) {
         // ctx.clearRect(0, 0, 400, 400)
         // ctx.fillStyle = "#000000";
@@ -144,6 +143,12 @@ $(function () {
         ctx.fillRect(ctrPt.x - radiusWidth, ctrPt.y - radiusWidth, 2 * radiusWidth, 2 * radiusWidth);
     }
 
+    function drawLinePts(p1: Point2D, p2: Point2D, ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    }
 
     //c onsole.log(printsGrid())
 
@@ -295,6 +300,9 @@ $(function () {
 
     }, false);
 
+
+
+
     let renderCanv = () => {
         ctx.clearRect(0, 0, 1000, 1000)
 
@@ -331,11 +339,8 @@ $(function () {
 
             // draw line
             ctx.strokeStyle = "#000";
+            drawLinePts(anchorPt, player, ctx)
 
-            ctx.beginPath();
-            ctx.moveTo(anchorPt.x, anchorPt.y);
-            ctx.lineTo(player.x, player.y);
-            ctx.stroke();
 
         }
     }
@@ -406,6 +411,23 @@ $(function () {
             return Math.atan2(p2.y - p1.y, p2.x - p1.x)
         }
 
+        type PolarPoint2D = { r: number, theta: number }
+
+        let ptsToPolar = (p1: Point2D, p2: Point2D): PolarPoint2D => {
+            return {
+                theta: Math.atan2(p2.y - p1.y, p2.x - p1.x),
+                r: ptMag(
+                    ptMinus(p2, p1))
+            }
+        }
+
+        let ptToPolar = (p: Point2D): PolarPoint2D => {
+            return {
+                theta: Math.atan2(p.y, p.x),
+                r: ptMag(p)
+            }
+        }
+
         let ptMinus = (p1: Point2D, p2: Point2D): Point2D => {
             return { x: p1.x - p2.x, y: p1.y - p2.y }
         }
@@ -458,20 +480,29 @@ $(function () {
             // let lengthDelta = attemptedNewLength - ropeLength
 
             let ropeVect = ptMinus(player, anchorPt)
-            
+
             let ropeTheta = ptAtan2(player, anchorPt);
 
-            let ropePerpVectTheta = ropeTheta-Math.PI/2
+            let ropePerpVectTheta = ropeTheta - Math.PI / 2
             // ptAtan2(anchorPt,player);
 
-            let ropePerpVect = ptScalarMult(10,{x:Math.cos(ropePerpVectTheta), y:Math.sin(ropePerpVectTheta)})
-                //  ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+            let ropePerpVect = ptScalarMult(10, { x: Math.cos(ropePerpVectTheta), y: Math.sin(ropePerpVectTheta) })
+            //  ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
             // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
 
             // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+
+            ctx.lineWidth = 4
 
             ctx.fillStyle = "#00AAAA"
             renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
+            ctx.strokeStyle = "#00AAAA"
+            drawLinePts(player, ptPlus(player, ptScalarMult(10, ropePerpVect)), ctx)
+
+
+            ctx.strokeStyle = "#A00";
+            drawLinePts(player, ptPlus(player, ptScalarMult(10, playerDesiredDelta)), ctx)
+
 
 
             if (attemptedNewLength > ropeLength) {
@@ -490,13 +521,31 @@ $(function () {
                 // console.log(ropePerpVect)
                 // console.log(ptProj(playerDesiredDelta, ropePerpVect))
 
-                let newPlayerDesiredDelta = ptScalarMult(
-                    ptMag(playerDesiredDelta),
-                    ptNormalized(ptProj(playerDesiredDelta, ropePerpVect)))
+
+
+                let newPlayerDesiredDelta =
+                    ptNormalized(ptProj(playerDesiredDelta, ropePerpVect))
+
+                
+
+                newPlayerDesiredDelta = ptScalarMult(
+                    ptMag(playerDesiredDelta), newPlayerDesiredDelta)
+
+
+
+                // console.log( ptMag(playerDesiredDelta))
                 // let newPlayerDesiredDelta=ptProj(playerDesiredDelta,ropePerpVect)
-                console.log(ptProj(playerDesiredDelta, ropePerpVect))
+                console.log(ropeTheta/Math.PI
+                )
 
                 playerDesiredDelta = newPlayerDesiredDelta
+
+
+
+                ctx.strokeStyle = "#0A0";
+                drawLinePts(player, ptPlus(player, ptScalarMult(10, newPlayerDesiredDelta)), ctx)
+
+
 
             }
             // player

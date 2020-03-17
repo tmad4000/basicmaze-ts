@@ -1,6 +1,7 @@
 import './vendor';
 import $ from 'jquery';
 import _ from 'lodash';
+import { countChanges } from 'jest-diff/build/printDiffs';
 
 const a = 1;
 // c onsole.log($, '');
@@ -154,7 +155,7 @@ $(function () {
     let controlKeys = { up: false, right: false, down: false, left: false, }
 
     let player: Point2D = idXToPos({ i: 1, j: 1 });
-    let anchorPt: Point2D | null = null
+    let anchorPt: Point2D = { x: 0, y: 0 }
     let isMouseDown = false;
 
     let tension = 0;
@@ -262,10 +263,10 @@ $(function () {
     }, false);
 
     window.addEventListener('mousedown', function (evt) {
-        isMouseDown=true
+        isMouseDown = true
     })
     window.addEventListener('mouseup', function (evt) {
-        isMouseDown=false
+        isMouseDown = false
     })
 
     canv.addEventListener('click', function (evt) {
@@ -343,6 +344,8 @@ $(function () {
 
     let nextTurn = () => {
 
+        renderCanv()
+
         // if (Math.random() < .1) {
 
         //     enems.push({ x: 3 + Math.random() * 400, y: 10, dir: 1 })
@@ -379,7 +382,7 @@ $(function () {
         }
 
 
-        console.log(playerVel)
+        // c onsole.log(playerVel)
         // console.log(playerDesiredDelta)
 
 
@@ -394,10 +397,104 @@ $(function () {
 
 
 
-        let nextPos = { x: player.x + playerDesiredDelta.x, y: player.y + playerDesiredDelta.y }
+
+        let ptDist = (p1: Point2D, p2: Point2D): number => {
+            return Math.hypot(p2.x - p1.x, p2.y - p1.y)
+        }
+
+        let ptAtan2 = (p1: Point2D, p2: Point2D): number => {
+            return Math.atan2(p2.y - p1.y, p2.x - p1.x)
+        }
+
+        let ptMinus = (p1: Point2D, p2: Point2D): Point2D => {
+            return { x: p1.x - p2.x, y: p1.y - p2.y }
+        }
+
+        let ptPlus = (p1: Point2D, p2: Point2D): Point2D => {
+            return { x: p2.x + p1.x, y: p2.y + p1.y }
+        }
+
+        let ptScalarMult = (scal: number, p: Point2D): Point2D => {
+            return { x: (p.x * scal), y: p.y * scal }
+        }
+
+        let ptDotP = (p1: Point2D, p2: Point2D): number => {
+            return p2.x * p1.x + p2.y * p1.y
+        }
+
+        let ptMag = (p: Point2D): number => {
+            return Math.hypot(p.x, p.y)
+        }
+
+        let ptProjScal = (v: Point2D, base: Point2D): number => {
+            return ptDotP(v, base) / ptMag(base)
+        }
+
+        let ptProj = (v: Point2D, base: Point2D): Point2D => {
+            return ptScalarMult(ptProjScal(v, base), base)
+        }
+
+        let ptNormalized = (v: Point2D): Point2D => {
+            return ptScalarMult(1 / ptMag(v), v)
+        }
+
+
+
+        // let nextPos = { x: player.x + playerDesiredDelta.x, y: player.y + playerDesiredDelta.y }
+        let nextPos = ptPlus(player, playerDesiredDelta)
+
         // if (checkMoveIsLegal(nextPos)) {
         //     player = nextPos
         // }
+
+
+        if (isMouseDown) {
+            ctx.fillStyle = "#0000FF"
+            // renderCenteredRect(nextPos, 2, ctx)
+
+
+            let ropeLength = ptDist(anchorPt, player)
+            let attemptedNewLength = ptDist(anchorPt, nextPos)
+            // let lengthDelta = attemptedNewLength - ropeLength
+
+            let ropeVect = ptMinus(player, anchorPt)
+            let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+
+            ctx.fillStyle = "#00AAAA"
+            renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
+
+
+            if (attemptedNewLength > ropeLength) {
+
+                // let theta = ptAtan2(player, nextPos);
+
+                //#todo projections
+
+                // nextPos.r -= attemptedNewLength - ropeLength
+                // nextPos.x -= lengthDelta * Math.cos(theta)
+                // nextPos.y -= lengthDelta * Math.sin(theta)
+
+                // console.log("p",player)
+                // console.log("a",anchorPt)
+                // console.log(ropeVect)
+                // console.log(ropePerpVect)
+                // console.log(ptProj(playerDesiredDelta, ropePerpVect))
+
+                let newPlayerDesiredDelta = ptScalarMult(
+                    ptMag(playerDesiredDelta),
+                    ptNormalized(ptProj(playerDesiredDelta, ropePerpVect)))
+                // let newPlayerDesiredDelta=ptProj(playerDesiredDelta,ropePerpVect)
+                console.log(newPlayerDesiredDelta)
+
+                playerDesiredDelta = newPlayerDesiredDelta
+
+            }
+            // player
+            // nextPos = 
+        }
+
+        nextPos = ptPlus(player, playerDesiredDelta)
+
 
         //splitting this achieves frictionless surface sliding
         if (checkMoveIsLegal({ x: nextPos.x, y: player.y })) { //check new x
@@ -465,7 +562,6 @@ $(function () {
         // })
 
 
-        renderCanv()
 
         setTimeout(() => {
             nextTurn()

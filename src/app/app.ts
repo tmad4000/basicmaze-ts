@@ -309,7 +309,7 @@ $(function () {
         playerDesiredDelta.y = playerVel.y
 
 
-        if (Math.abs(playerVel.x) < 5) {
+        if (Math.abs(playerVel.x) < 50) {
             if (!controlKeys.left && !controlKeys.right) { 
 
 
@@ -321,7 +321,7 @@ $(function () {
             }
         }
 
-        if (Math.abs(playerVel.y) < 5) {
+        if (Math.abs(playerVel.y) < 50) {
 
             if (!controlKeys.up && !controlKeys.down) { }
             else {

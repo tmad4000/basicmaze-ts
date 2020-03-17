@@ -460,7 +460,6 @@ $(function () {
             let ropeVect = ptMinus(player, anchorPt)
             
             let ropeTheta = ptAtan2(player, anchorPt);
-            console.log(180/Math.PI * ropeTheta)
 
             let ropePerpVectTheta = ropeTheta-Math.PI/2
             // ptAtan2(anchorPt,player);
@@ -495,7 +494,7 @@ $(function () {
                     ptMag(playerDesiredDelta),
                     ptNormalized(ptProj(playerDesiredDelta, ropePerpVect)))
                 // let newPlayerDesiredDelta=ptProj(playerDesiredDelta,ropePerpVect)
-                // console.log(ptProj(playerDesiredDelta, ropePerpVect))
+                console.log(ptProj(playerDesiredDelta, ropePerpVect))
 
                 playerDesiredDelta = newPlayerDesiredDelta
 

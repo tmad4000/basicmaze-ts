@@ -26,7 +26,7 @@ function getMousePosition(canvas, event): Point2D {
     let y = event.clientY - rect.top;
     // alert(rect.top)
     //c onsole.log("Coordinate x: " + x,
-        // "Coordinate y: " + y);
+    // "Coordinate y: " + y);
     return { x, y }
 }
 
@@ -55,7 +55,7 @@ $(function () {
 
     let grid: Array<Array<Cell>> = _.times(10,
         () => _.times(10,
-            () => new Cell()))
+            () => new Cell("red")))
 
 
     // grid[4][6] = new Cell("red")
@@ -70,6 +70,8 @@ $(function () {
 
     // _.range(1, 4).map(n => grid[5][n] = new Cell("red"))
 
+
+    /*
     let protoMap =
         [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
@@ -83,6 +85,9 @@ $(function () {
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
     grid = protoMap.map((r) => r.map(c => c == 0 ? new Cell("red") : new Cell()))
+    */
+
+
 
     // for (let i=0;i<10)
 
@@ -110,7 +115,7 @@ $(function () {
         return { x: pt.j * Cell.CELL_WIDTH, y: pt.i * Cell.CELL_WIDTH }
     }
 
-    function allValsFalse(myMap: Object) {
+    function areAllValsFalse(myMap: Object) {
         _.values(myMap).forEach((val) => { if (val) return false })
         return true
     }
@@ -131,6 +136,14 @@ $(function () {
     }
 
 
+    function renderCenteredRect(ctrPt: Point2D, radiusWidth: number, ctx: CanvasRenderingContext2D) {
+        // ctx.clearRect(0, 0, 400, 400)
+        // ctx.fillStyle = "#000000";
+        // ctx.fillRect(ctrPt.x,ctrPt.x,ctrPt.x,ctrPt.x)
+        ctx.fillRect(ctrPt.x - radiusWidth, ctrPt.y - radiusWidth, 2 * radiusWidth, 2 * radiusWidth);
+    }
+
+
     //c onsole.log(printsGrid())
 
     // alert(grid)
@@ -141,6 +154,9 @@ $(function () {
     let controlKeys = { up: false, right: false, down: false, left: false, }
 
     let player: Point2D = idXToPos({ i: 1, j: 1 });
+    let anchorPt: Point2D | null = null
+    let isMouseDown = false;
+
     let tension = 0;
     let powerCharge = 0;
     const PLAYER_SPEED = 2
@@ -227,6 +243,8 @@ $(function () {
 
     canv.addEventListener('mousemove', function (evt) {
 
+
+        anchorPt = getMousePosition(canv, evt)
         // player = getMousePosition(canv, evt)
         // player = getMousePosition(canv, evt)
 
@@ -243,17 +261,29 @@ $(function () {
 
     }, false);
 
+    window.addEventListener('mousedown', function (evt) {
+        isMouseDown=true
+    })
+    window.addEventListener('mouseup', function (evt) {
+        isMouseDown=false
+    })
+
     canv.addEventListener('click', function (evt) {
         //c onsole.log("fire")
 
         let mousePos = getMousePosition(canv, evt)
         let { i, j } = posToIdx(mousePos)
 
+        /*
         grid[i][j] = grid[i][j].color == "brown" ? new Cell("red") : new Cell("brown");
+        */
+
         // grid[i][j]=new Cell("red");
 
 
-        objs.push(getMousePosition(canv, evt))
+        /* objs.push(getMousePosition(canv, evt)) */
+
+
 
         // ctx.clearRect(lastClientX-10, lastClientY - 70, 10, 10);
         // ctx.fillRect(evt.clientX-10, evt.clientY - 70, 10, 10);
@@ -265,7 +295,7 @@ $(function () {
     }, false);
 
     let renderCanv = () => {
-        ctx.clearRect(0, 0, 400, 400)
+        ctx.clearRect(0, 0, 1000, 1000)
 
         renderGrid(ctx)
 
@@ -286,10 +316,27 @@ $(function () {
         // )
 
 
+
         //render player
         ctx.fillStyle = "#FFFF00";
         ctx.fillRect(player.x - 5 - powerCharge / 10 / 2, player.y - 5 - powerCharge / 10 / 2, 10 + powerCharge / 10, 10 + powerCharge / 10);
 
+        //render anchor point
+        if (isMouseDown && anchorPt !== null) {
+            ctx.fillStyle = "#00AA00";
+            renderCenteredRect(anchorPt, 10, ctx);
+
+
+
+            // draw line
+            ctx.strokeStyle = "#000";
+
+            ctx.beginPath();
+            ctx.moveTo(anchorPt.x, anchorPt.y);
+            ctx.lineTo(player.x, player.y);
+            ctx.stroke();
+
+        }
     }
 
     // renderCanv()
@@ -310,7 +357,7 @@ $(function () {
 
 
         if (Math.abs(playerVel.x) < 50) {
-            if (!controlKeys.left && !controlKeys.right) { 
+            if (!controlKeys.left && !controlKeys.right) {
 
 
             }
@@ -332,7 +379,7 @@ $(function () {
         }
 
 
-        console.log( playerVel)
+        console.log(playerVel)
         // console.log(playerDesiredDelta)
 
 
@@ -356,8 +403,8 @@ $(function () {
         if (checkMoveIsLegal({ x: nextPos.x, y: player.y })) { //check new x
 
             // if (powerCharge > 0 || allValsFalse(controlKeys))
-                // if (powerCharge > 0 || allValsFalse(controlKeys))
-                // playerVel.x = Math.max(0, nextPos.x - player.x)
+            // if (powerCharge > 0 || allValsFalse(controlKeys))
+            // playerVel.x = Math.max(0, nextPos.x - player.x)
 
             powerCharge -= Math.abs(playerDesiredDelta.x)
             player.x = nextPos.x
@@ -371,7 +418,7 @@ $(function () {
 
         if (checkMoveIsLegal({ x: player.x, y: nextPos.y })) { //check new y
             // if (powerCharge > 0 || allValsFalse(controlKeys))
-                // playerVel.y = Math.max(0, nextPos.y - player.y)
+            // playerVel.y = Math.max(0, nextPos.y - player.y)
 
             powerCharge -= Math.abs(playerDesiredDelta.y)
             player.y = nextPos.y

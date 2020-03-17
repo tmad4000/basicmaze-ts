@@ -458,7 +458,18 @@ $(function () {
             // let lengthDelta = attemptedNewLength - ropeLength
 
             let ropeVect = ptMinus(player, anchorPt)
-            let ropePerpVect = ptNormalized({ y: 1, x: 1 * ropeVect.y / ropeVect.x })
+            
+            let ropeTheta = ptAtan2(player, anchorPt);
+            console.log(180/Math.PI * ropeTheta)
+
+            let ropePerpVectTheta = ropeTheta-Math.PI/2
+            // ptAtan2(anchorPt,player);
+
+            let ropePerpVect = ptScalarMult(10,{x:Math.cos(ropePerpVectTheta), y:Math.sin(ropePerpVectTheta)})
+                //  ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+            // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+
+            // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
 
             ctx.fillStyle = "#00AAAA"
             renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
@@ -484,7 +495,7 @@ $(function () {
                     ptMag(playerDesiredDelta),
                     ptNormalized(ptProj(playerDesiredDelta, ropePerpVect)))
                 // let newPlayerDesiredDelta=ptProj(playerDesiredDelta,ropePerpVect)
-                console.log(ptProj(playerDesiredDelta, ropePerpVect))
+                // console.log(ptProj(playerDesiredDelta, ropePerpVect))
 
                 playerDesiredDelta = newPlayerDesiredDelta
 

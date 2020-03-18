@@ -512,6 +512,17 @@ $(function () {
         // }
 
 
+        ctx.strokeStyle = "violet"
+        ctx.lineWidth = 5
+
+        let tt=0;
+        tt+=.01
+        let r=10
+
+        let vv1={x:r*Math.cos(tt), y:r*Math.sin(tt)}
+        drawLinePts({x:0,y:0},vv1,ctx)
+
+
         if (isMouseDown) {
             // ctx.fillStyle = "#0000FF"
             // renderCenteredRect(nextPos, 2, ctx)
@@ -574,10 +585,10 @@ $(function () {
                 // console.log(ropePerpVect)
                 // console.log(ptProj(playerDesiredDelta, ropePerpVect))
 
-
+// debugger
                 let prj= ptProj(playerDesiredDelta, ropePerpVect)
 
-                let newPlayerDesiredDelta =ptNormalized(prj)
+                let newPlayerDesiredDelta = ptNormalized(prj)
                 //  ptMag(prj)<3  ? ptScalarMult( ptMag(playerDesiredDelta), ropePerpVect) :
                 //     ptNormalized(prj)
 

@@ -37,8 +37,8 @@ $(function () {
 
     class Cell {
         static readonly CELL_WIDTH: number = 80
-        static readonly  EMPTY_COLOR = "#ff7f7f" //light red
-        static readonly  FILLED_COLOR = "brown"
+        static readonly EMPTY_COLOR = "#ff7f7f" //light red
+        static readonly FILLED_COLOR = "brown"
 
         color: string
         constructor(color: string = Cell.FILLED_COLOR) {
@@ -180,9 +180,9 @@ $(function () {
         ctx.stroke();
 
         ctx.strokeStyle = "#F00"
-        ctx.lineWidth=2
+        ctx.lineWidth = 2
         ctx.beginPath();
-        ctx.arc(p.x, p.y, O, 0, Math.PI/8);
+        ctx.arc(p.x, p.y, O, 0, Math.PI / 8);
         ctx.stroke();
 
 
@@ -192,495 +192,507 @@ $(function () {
     }
 
 
-//c onsole.log(printsGrid())
+    //c onsole.log(printsGrid())
 
-// alert(grid)
+    // alert(grid)
 
-let objs: Array<{ x: number, y: number }> = [] //{x:3,y:1}
-// let enems = [] //{x:3,y:1, dir: 1}
+    let objs: Array<{ x: number, y: number }> = [] //{x:3,y:1}
+    // let enems = [] //{x:3,y:1, dir: 1}
 
-let controlKeys = { up: false, right: false, down: false, left: false, }
+    let controlKeys = { up: false, right: false, down: false, left: false, }
 
-let player: Point2D = idXToPos({ i: 1, j: 1 });
-let anchorPt: Point2D = { x: 0, y: 0 }
-let isMouseDown = false;
+    let player: Point2D = idXToPos({ i: 1, j: 1 });
+    let anchorPt: Point2D = { x: 0, y: 0 }
+    let isMouseDown = false;
 
-let tension = 0;
-let powerCharge = 0;
-const PLAYER_SPEED = 2
+    let tension = 0;
+    let powerCharge = 0;
+    const PLAYER_SPEED = 2
 
-let playerVel: Point2D = { x: 3, y: 3 }
+    let playerVel: Point2D = { x: 3, y: 3 }
 
 
 
-// let player: Point2D = { x: 100, y: 100 }
-let gunHeat = 0
+    // let player: Point2D = { x: 100, y: 100 }
+    let gunHeat = 0
 
-var canv: HTMLCanvasElement = document.getElementById("myCanvas") as HTMLCanvasElement;
+    var canv: HTMLCanvasElement = document.getElementById("myCanvas") as HTMLCanvasElement;
 
-var ctx = canv.getContext("2d");
-// ctx.beginPath();
-// ctx.arc(95, 50, 40, 0, 2 * Math.PI);
-// ctx.stroke();
+    var ctx = canv.getContext("2d");
+    // ctx.beginPath();
+    // ctx.arc(95, 50, 40, 0, 2 * Math.PI);
+    // ctx.stroke();
 
-// let lastClientX = 0
-// let lastClientY = 0
+    // let lastClientX = 0
+    // let lastClientY = 0
 
 
-function checkMoveIsLegal(nextPos: Point2D) {
-    let { i, j } = posToIdx(nextPos)
+    function checkMoveIsLegal(nextPos: Point2D) {
+        let { i, j } = posToIdx(nextPos)
 
-    // return
-    if (i >= 0 && j >= 0 && i < grid.length && j < grid[i].length) {
-        return grid[i][j].color === Cell.EMPTY_COLOR //else it means collision
-    }
-    else {
-        return false;
-    }
-}
-
-$(window).keydown(checkKeyDown)
-$(window).keyup(checkKeyUp)
-// canv.addEventListener('keydown',check,false)
-function checkKeyDown(e) {
-    let isARelevantKey = false;
-    var code = e.keyCode;
-    // if(code==38)
-    //  alert("extraup")
-
-    //  switch (code) {
-    //     case 37: controlKeys.left = true; isARelevantKey=true; break; //Left key
-    //     case 38: controlKeys.up = true; isARelevantKey=true; break; //Up key
-    //     case 39: controlKeys.right = true; isARelevantKey=true; break; //Right key
-    //     case 40: controlKeys.down = true; isARelevantKey=true; break; //Down key
-    // }
-
-    if (code == 37) { controlKeys.left = true; isARelevantKey = true; } //Left key
-    if (code == 38) { controlKeys.up = true; isARelevantKey = true; } //Up key
-    if (code == 39) { controlKeys.right = true; isARelevantKey = true; } //Right key
-    if (code == 40) { controlKeys.down = true; isARelevantKey = true; } //Down key
-
-
-
-    // switch (code) {
-    //     case 37: player.x-=PLAYER_SPEED; break; //Left key
-    //     case 38: player.y-=PLAYER_SPEED; break; //Up key
-    //     case 39: player.x+=PLAYER_SPEED; break; //Right key
-    //     case 40: player.y+=PLAYER_SPEED; break; //Down key
-    //     default: isARelevantKey=false // alert(code); //Everything else
-    // }
-
-    if (isARelevantKey) {
-        e.preventDefault()
-    }
-}
-
-function checkKeyUp(e) {
-    let isARelevantKey = false;
-    var code = e.keyCode;
-
-    if (code == 37) { controlKeys.left = false; isARelevantKey = true; } //Left key
-    if (code == 38) { controlKeys.up = false; isARelevantKey = true; } //Up key
-    if (code == 39) { controlKeys.right = false; isARelevantKey = true; } //Right key
-    if (code == 40) { controlKeys.down = false; isARelevantKey = true; } //Down key
-
-    if (isARelevantKey) {
-        e.preventDefault()
-    }
-}
-
-canv.addEventListener('mousemove', function (evt) {
-
-
-    anchorPt = getMousePosition(canv, evt)
-    // player = getMousePosition(canv, evt)
-    // player = getMousePosition(canv, evt)
-
-    // ctx.fillStyle = "#FF0000";
-    // ctx.clearRect(lastClientX - 10, lastClientY - 70, 10, 10);
-    // ctx.fillRect(evt.clientX - 10, evt.clientY - 70, 10, 10);
-    // lastClientX = evt.clientX
-    // lastClientY = evt.clientY
-
-    // c onsole.log(evt.clientX + ',' + evt.clientY);
-    // alert(evt.clientX + ',' + evt.clientY);
-    renderCanv()
-
-
-}, false);
-
-window.addEventListener('mousedown', function (evt) {
-    isMouseDown = true
-})
-window.addEventListener('mouseup', function (evt) {
-    isMouseDown = false
-})
-
-canv.addEventListener('click', function (evt) {
-    //c onsole.log("fire")
-
-    let mousePos = getMousePosition(canv, evt)
-    let { i, j } = posToIdx(mousePos)
-
-    /*
-    grid[i][j] = grid[i][j].color == Cell.FILLED_COLOR ? new Cell(Cell.EMPTY_COLOR) : new Cell(Cell.FILLED_COLOR);
-    */
-
-    // grid[i][j]=new Cell(Cell.EMPTY_COLOR);
-
-
-    /* objs.push(getMousePosition(canv, evt)) */
-
-
-
-    // ctx.clearRect(lastClientX-10, lastClientY - 70, 10, 10);
-    // ctx.fillRect(evt.clientX-10, evt.clientY - 70, 10, 10);
-    // lastClientX = evt.clientX
-    // lastClientY = evt.clientY
-
-    renderCanv()
-
-}, false);
-
-
-
-
-let renderCanv = () => {
-    ctx.clearRect(0, 0, 1000, 1000)
-
-    renderGrid(ctx)
-
-    ctx.fillStyle = "#000000";
-
-    objs.forEach(o => {
-        ctx.fillRect(o.x - 10, o.y - 10, 5, 5);
-        // debugger
-    }
-    )
-
-    ctx.fillStyle = "#0000FF";
-
-    // enems.forEach(o => {
-    //     ctx.fillRect(o.x + 10 + 3, o.y + 50, 20, 10);
-    //     // debugger
-    // }
-    // )
-
-
-
-    //render player
-    ctx.fillStyle = "#FFFF00";
-    ctx.fillRect(player.x - 5 - powerCharge / 10 / 2, player.y - 5 - powerCharge / 10 / 2, 10 + powerCharge / 10, 10 + powerCharge / 10);
-
-    //render anchor point
-    if (isMouseDown && anchorPt !== null) {
-        ctx.fillStyle = "#00AA00";
-        renderCenteredRect(anchorPt, 10, ctx);
-
-
-
-        // draw line
-        ctx.strokeStyle = "#000";
-        drawLinePts(anchorPt, player, ctx)
-
-
-    }
-}
-
-// renderCanv()
-
-let nextTurn = () => {
-
-    renderCanv()
-
-    // if (Math.random() < .1) {
-
-    //     enems.push({ x: 3 + Math.random() * 400, y: 10, dir: 1 })
-    //     // debugger
-    // }
-
-    let playerDesiredDelta: Point2D = { x: 0, y: 0 }
-
-
-    playerDesiredDelta.x = playerVel.x
-    playerDesiredDelta.y = playerVel.y
-
-
-    if (Math.abs(playerVel.x) < 50) {
-        if (!controlKeys.left && !controlKeys.right) {
-
-
+        // return
+        if (i >= 0 && j >= 0 && i < grid.length && j < grid[i].length) {
+            return grid[i][j].color === Cell.EMPTY_COLOR //else it means collision
         }
         else {
-
-            if (controlKeys.left) playerDesiredDelta.x += -(PLAYER_SPEED + powerCharge / 10);
-            if (controlKeys.right) playerDesiredDelta.x += +(PLAYER_SPEED + powerCharge / 10);
+            return false;
         }
     }
 
-    if (Math.abs(playerVel.y) < 50) {
+    $(window).keydown(checkKeyDown)
+    $(window).keyup(checkKeyUp)
+    // canv.addEventListener('keydown',check,false)
+    function checkKeyDown(e) {
+        let isARelevantKey = false;
+        var code = e.keyCode;
+        // if(code==38)
+        //  alert("extraup")
 
-        if (!controlKeys.up && !controlKeys.down) { }
-        else {
-            if (controlKeys.up) playerDesiredDelta.y += -(PLAYER_SPEED + powerCharge / 10);
-            if (controlKeys.down) playerDesiredDelta.y += +(PLAYER_SPEED + powerCharge / 10);
+        //  switch (code) {
+        //     case 37: controlKeys.left = true; isARelevantKey=true; break; //Left key
+        //     case 38: controlKeys.up = true; isARelevantKey=true; break; //Up key
+        //     case 39: controlKeys.right = true; isARelevantKey=true; break; //Right key
+        //     case 40: controlKeys.down = true; isARelevantKey=true; break; //Down key
+        // }
 
+        if (code == 37) { controlKeys.left = true; isARelevantKey = true; } //Left key
+        if (code == 38) { controlKeys.up = true; isARelevantKey = true; } //Up key
+        if (code == 39) { controlKeys.right = true; isARelevantKey = true; } //Right key
+        if (code == 40) { controlKeys.down = true; isARelevantKey = true; } //Down key
+
+
+
+        // switch (code) {
+        //     case 37: player.x-=PLAYER_SPEED; break; //Left key
+        //     case 38: player.y-=PLAYER_SPEED; break; //Up key
+        //     case 39: player.x+=PLAYER_SPEED; break; //Right key
+        //     case 40: player.y+=PLAYER_SPEED; break; //Down key
+        //     default: isARelevantKey=false // alert(code); //Everything else
+        // }
+
+        if (isARelevantKey) {
+            e.preventDefault()
         }
     }
 
+    function checkKeyUp(e) {
+        let isARelevantKey = false;
+        var code = e.keyCode;
 
-    // c onsole.log(playerVel)
-    // console.log(playerDesiredDelta)
+        if (code == 37) { controlKeys.left = false; isARelevantKey = true; } //Left key
+        if (code == 38) { controlKeys.up = false; isARelevantKey = true; } //Up key
+        if (code == 39) { controlKeys.right = false; isARelevantKey = true; } //Right key
+        if (code == 40) { controlKeys.down = false; isARelevantKey = true; } //Down key
 
-
-    powerCharge -= .5 //cooldown rate
-    powerCharge = Math.max(powerCharge, 0);
-
-    tension = 0
-    if (controlKeys.left && controlKeys.right)
-        tension += 1
-    if (controlKeys.up && controlKeys.down)
-        tension += 1
-
-
-
-
-    let ptDist = (p1: Point2D, p2: Point2D): number => {
-        return Math.hypot(p2.x - p1.x, p2.y - p1.y)
-    }
-
-    let ptAtan2 = (p1: Point2D, p2: Point2D): number => {
-        return Math.atan2(p2.y - p1.y, p2.x - p1.x)
-    }
-
-    type PolarPoint2D = { r: number, theta: number }
-
-    let ptsToPolar = (p1: Point2D, p2: Point2D): PolarPoint2D => {
-        return {
-            theta: Math.atan2(p2.y - p1.y, p2.x - p1.x),
-            r: ptMag(
-                ptMinus(p2, p1))
+        if (isARelevantKey) {
+            e.preventDefault()
         }
     }
 
-    let ptToPolar = (p: Point2D): PolarPoint2D => {
-        return {
-            theta: Math.atan2(p.y, p.x),
-            r: ptMag(p)
-        }
-    }
+    canv.addEventListener('mousemove', function (evt) {
 
-    let ptMinus = (p1: Point2D, p2: Point2D): Point2D => {
-        return { x: p1.x - p2.x, y: p1.y - p2.y }
-    }
 
-    let ptPlus = (p1: Point2D, p2: Point2D): Point2D => {
-        return { x: p2.x + p1.x, y: p2.y + p1.y }
-    }
+        anchorPt = getMousePosition(canv, evt)
+        // player = getMousePosition(canv, evt)
+        // player = getMousePosition(canv, evt)
 
-    let ptScalarMult = (scal: number, p: Point2D): Point2D => {
-        return { x: (p.x * scal), y: p.y * scal }
-    }
+        // ctx.fillStyle = "#FF0000";
+        // ctx.clearRect(lastClientX - 10, lastClientY - 70, 10, 10);
+        // ctx.fillRect(evt.clientX - 10, evt.clientY - 70, 10, 10);
+        // lastClientX = evt.clientX
+        // lastClientY = evt.clientY
 
-    let ptDotP = (p1: Point2D, p2: Point2D): number => {
-        return p2.x * p1.x + p2.y * p1.y
-    }
+        // c onsole.log(evt.clientX + ',' + evt.clientY);
+        // alert(evt.clientX + ',' + evt.clientY);
+        renderCanv()
 
-    let ptMag = (p: Point2D): number => {
-        return Math.hypot(p.x, p.y)
-    }
 
-    let ptProjScal = (v: Point2D, base: Point2D): number => {
-        return ptDotP(v, base) / ptMag(base)
-    }
+    }, false);
 
-    let ptProj = (v: Point2D, base: Point2D): Point2D => {
-        return ptScalarMult(ptProjScal(v, base), base)
-    }
-
-    let ptNormalized = (v: Point2D): Point2D => {
-        return ptScalarMult(1 / ptMag(v), v)
-    }
-
-
-
-    // let nextPos = { x: player.x + playerDesiredDelta.x, y: player.y + playerDesiredDelta.y }
-    let nextPos = ptPlus(player, playerDesiredDelta)
-
-    // if (checkMoveIsLegal(nextPos)) {
-    //     player = nextPos
-    // }
-
-
-    if (isMouseDown) {
-        ctx.fillStyle = "#0000FF"
-        // renderCenteredRect(nextPos, 2, ctx)
-
-
-        let ropeLength = ptDist(anchorPt, player)
-        let attemptedNewLength = ptDist(anchorPt, nextPos)
-        // let lengthDelta = attemptedNewLength - ropeLength
-
-        let ropeVect = ptMinus(player, anchorPt)
-
-        let ropeTheta = ptAtan2(anchorPt, player);
-
-        drawAxesAndAngles(anchorPt, ropeTheta, ctx)
-
-
-
-        let ropePerpVectTheta = ropeTheta - Math.PI / 2
-        // ptAtan2(anchorPt,player);
-
-        drawAxesAndAngles(player, ropePerpVectTheta, ctx)
-
-
-        let ropePerpVect = ptScalarMult(10, { x: Math.cos(ropePerpVectTheta), y: Math.sin(ropePerpVectTheta) })
-        //  ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
-        // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
-
-        // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
-
-        ctx.lineWidth = 4
-
-        ctx.fillStyle = "#00AAAA" //green
-        renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
-
-        ctx.strokeStyle = "#00AAAA" //green
-        drawLinePts(player, ptPlus(player, ptScalarMult(10, ropePerpVect)), ctx)
-
-
-        ctx.strokeStyle = "#A00";
-        drawLinePts(player, ptPlus(player, ptScalarMult(10, playerDesiredDelta)), ctx)
-
-
-
-        if (attemptedNewLength > ropeLength) {
-
-            // let theta = ptAtan2(player, nextPos);
-
-            //#todo projections
-
-            // nextPos.r -= attemptedNewLength - ropeLength
-            // nextPos.x -= lengthDelta * Math.cos(theta)
-            // nextPos.y -= lengthDelta * Math.sin(theta)
-
-            // console.log("p",player)
-            // console.log("a",anchorPt)
-            // console.log(ropeVect)
-            // console.log(ropePerpVect)
-            // console.log(ptProj(playerDesiredDelta, ropePerpVect))
-
-
-
-            let newPlayerDesiredDelta =
-                ptNormalized(ptProj(playerDesiredDelta, ropePerpVect))
-
-
-
-            newPlayerDesiredDelta = ptScalarMult(
-                ptMag(playerDesiredDelta), newPlayerDesiredDelta)
-
-
-
-            // console.log( ptMag(playerDesiredDelta))
-            // let newPlayerDesiredDelta=ptProj(playerDesiredDelta,ropePerpVect)
-            console.log(ropeTheta / Math.PI
-            )
-
-            playerDesiredDelta = newPlayerDesiredDelta
-
-
-
-            ctx.strokeStyle = "#0A0";
-            drawLinePts(player, ptPlus(player, ptScalarMult(10, newPlayerDesiredDelta)), ctx)
-
-
-
-        }
-        // player
-        // nextPos = 
-    }
-
-    nextPos = ptPlus(player, playerDesiredDelta)
-
-
-    //splitting this achieves frictionless surface sliding
-    if (checkMoveIsLegal({ x: nextPos.x, y: player.y })) { //check new x
-
-        // if (powerCharge > 0 || allValsFalse(controlKeys))
-        // if (powerCharge > 0 || allValsFalse(controlKeys))
-        // playerVel.x = Math.max(0, nextPos.x - player.x)
-
-        powerCharge -= Math.abs(playerDesiredDelta.x)
-        player.x = nextPos.x
-
-
-    }
-    else {
-        tension += 1
-        playerVel.x *= -1
-    }
-
-    if (checkMoveIsLegal({ x: player.x, y: nextPos.y })) { //check new y
-        // if (powerCharge > 0 || allValsFalse(controlKeys))
-        // playerVel.y = Math.max(0, nextPos.y - player.y)
-
-        powerCharge -= Math.abs(playerDesiredDelta.y)
-        player.y = nextPos.y
-    }
-    else {
-        tension += 1
-        playerVel.y *= -1
-
-    }
-
-    const CHARGE_TENSION_MULTIPLIER = 3
-    powerCharge += CHARGE_TENSION_MULTIPLIER * tension
-
-
-    objs.forEach((o, i) => {
-        o.y -= 10;
-        if (o.y < 0) { //delete bullet if it's off screen
-            // debugger
-            objs.splice(i, 1)
-
-        }
-        // delete objs[i]
+    window.addEventListener('mousedown', function (evt) {
+        isMouseDown = true
+    })
+    window.addEventListener('mouseup', function (evt) {
+        isMouseDown = false
     })
 
-    // enems.forEach((o, i) => {
-    //     if (o.x >= 350 && o.dir == 1) {
-    //         o.dir = -1
-    //         o.y += 15
-    //         // debugger
-    //     }
-    //     else if (o.x <= 0 && o.dir == -1) {
-    //         o.dir = 1
-    //         o.y += 15
-    //     }
+    canv.addEventListener('click', function (evt) {
+        //c onsole.log("fire")
+
+        let mousePos = getMousePosition(canv, evt)
+        let { i, j } = posToIdx(mousePos)
+
+        /*
+        grid[i][j] = grid[i][j].color == Cell.FILLED_COLOR ? new Cell(Cell.EMPTY_COLOR) : new Cell(Cell.FILLED_COLOR);
+        */
+
+        // grid[i][j]=new Cell(Cell.EMPTY_COLOR);
+
+
+        /* objs.push(getMousePosition(canv, evt)) */
 
 
 
-    //     o.x += 5 * o.dir;
+        // ctx.clearRect(lastClientX-10, lastClientY - 70, 10, 10);
+        // ctx.fillRect(evt.clientX-10, evt.clientY - 70, 10, 10);
+        // lastClientX = evt.clientX
+        // lastClientY = evt.clientY
 
-    //     // if(o.x>400) { 
-    //     //     enems.splice(i,1)
+        renderCanv()
 
-    //     // }
-    // })
+    }, false);
 
 
 
-    setTimeout(() => {
-        nextTurn()
 
+    let renderCanv = () => {
+        ctx.clearRect(0, 0, 1000, 1000)
+
+        renderGrid(ctx)
+
+        ctx.fillStyle = "#000000";
+
+        objs.forEach(o => {
+            ctx.fillRect(o.x - 10, o.y - 10, 5, 5);
+            // debugger
+        }
+        )
+
+        ctx.fillStyle = "#0000FF";
+
+        // enems.forEach(o => {
+        //     ctx.fillRect(o.x + 10 + 3, o.y + 50, 20, 10);
+        //     // debugger
+        // }
+        // )
+
+
+
+        //render player
+        ctx.fillStyle = "#FFFF00";
+        ctx.fillRect(player.x - 5 - powerCharge / 10 / 2, player.y - 5 - powerCharge / 10 / 2, 10 + powerCharge / 10, 10 + powerCharge / 10);
+
+        //render anchor point
+        if (isMouseDown && anchorPt !== null) {
+            ctx.fillStyle = "#00AA00";  //green
+            renderCenteredRect(anchorPt, 10, ctx);
+
+
+
+            // draw line
+            ctx.strokeStyle = "#000"; //black
+            drawLinePts(anchorPt, player, ctx)
+
+
+        }
     }
-        ,
-        15
-    )
-}
 
-nextTurn()
+    // renderCanv()
+
+    let nextTurn = () => {
+
+        renderCanv()
+
+        // if (Math.random() < .1) {
+
+        //     enems.push({ x: 3 + Math.random() * 400, y: 10, dir: 1 })
+        //     // debugger
+        // }
+
+        let playerDesiredDelta: Point2D = { x: 0, y: 0 }
+
+
+        playerDesiredDelta.x = playerVel.x
+        playerDesiredDelta.y = playerVel.y
+
+
+        if (Math.abs(playerVel.x) < 50) {
+            if (!controlKeys.left && !controlKeys.right) {
+
+
+            }
+            else {
+
+                if (controlKeys.left) playerDesiredDelta.x += -(PLAYER_SPEED + powerCharge / 10);
+                if (controlKeys.right) playerDesiredDelta.x += +(PLAYER_SPEED + powerCharge / 10);
+            }
+        }
+
+        if (Math.abs(playerVel.y) < 50) {
+
+            if (!controlKeys.up && !controlKeys.down) { }
+            else {
+                if (controlKeys.up) playerDesiredDelta.y += -(PLAYER_SPEED + powerCharge / 10);
+                if (controlKeys.down) playerDesiredDelta.y += +(PLAYER_SPEED + powerCharge / 10);
+
+            }
+        }
+
+
+        // c onsole.log(playerVel)
+        // console.log(playerDesiredDelta)
+
+
+        powerCharge -= .5 //cooldown rate
+        powerCharge = Math.max(powerCharge, 0);
+
+        tension = 0
+        if (controlKeys.left && controlKeys.right)
+            tension += 1
+        if (controlKeys.up && controlKeys.down)
+            tension += 1
+
+
+
+
+        let ptDist = (p1: Point2D, p2: Point2D): number => {
+            return Math.hypot(p2.x - p1.x, p2.y - p1.y)
+        }
+
+        let ptAtan2 = (p1: Point2D, p2: Point2D): number => {
+            return Math.atan2(p2.y - p1.y, p2.x - p1.x)
+        }
+
+        type PolarPoint2D = { r: number, theta: number }
+
+        let ptsToPolar = (p1: Point2D, p2: Point2D): PolarPoint2D => {
+            return {
+                theta: Math.atan2(p2.y - p1.y, p2.x - p1.x),
+                r: ptMag(
+                    ptMinus(p2, p1))
+            }
+        }
+
+        let ptToPolar = (p: Point2D): PolarPoint2D => {
+            return {
+                theta: Math.atan2(p.y, p.x),
+                r: ptMag(p)
+            }
+        }
+
+        let ptMinus = (p1: Point2D, p2: Point2D): Point2D => {
+            return { x: p1.x - p2.x, y: p1.y - p2.y }
+        }
+
+        let ptPlus = (p1: Point2D, p2: Point2D): Point2D => {
+            return { x: p2.x + p1.x, y: p2.y + p1.y }
+        }
+
+        let ptScalarMult = (scal: number, p: Point2D): Point2D => {
+            return { x: (p.x * scal), y: p.y * scal }
+        }
+
+        let ptDotP = (p1: Point2D, p2: Point2D): number => {
+            return p2.x * p1.x + p2.y * p1.y
+        }
+
+        let ptMag = (p: Point2D): number => {
+            return Math.hypot(p.x, p.y)
+        }
+
+        let ptProjScal = (v: Point2D, base: Point2D): number => {
+            return ptDotP(v, base) / (ptMag(base)*ptMag(base))
+        }
+
+        let ptProj = (v: Point2D, base: Point2D): Point2D => {
+            return ptScalarMult(ptProjScal(v, base), base)
+        }
+
+        let ptNormalized = (v: Point2D): Point2D => {
+            return ptScalarMult(1 / ptMag(v), v)
+        }
+
+
+
+        // let nextPos = { x: player.x + playerDesiredDelta.x, y: player.y + playerDesiredDelta.y }
+        let nextPos = ptPlus(player, playerDesiredDelta)
+
+        // if (checkMoveIsLegal(nextPos)) {
+        //     player = nextPos
+        // }
+
+
+        if (isMouseDown) {
+            // ctx.fillStyle = "#0000FF"
+            // renderCenteredRect(nextPos, 2, ctx)
+
+
+            let ropeLength = ptDist(anchorPt, player)
+            let attemptedNewLength = ptDist(anchorPt, nextPos)
+            // let lengthDelta = attemptedNewLength - ropeLength
+
+            let ropeVect = ptMinus(player, anchorPt)
+
+            let ropeTheta = ptAtan2(anchorPt, player);
+
+            drawAxesAndAngles(anchorPt, ropeTheta, ctx)
+
+
+
+            let ropePerpVectTheta = ropeTheta + Math.PI / 2
+            // ptAtan2(anchorPt,player);
+
+            drawAxesAndAngles(player, ropePerpVectTheta, ctx)
+
+
+            let ropePerpVect = ptScalarMult(10, { x: Math.cos(ropePerpVectTheta), y: Math.sin(ropePerpVectTheta) })
+            //  ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+            // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+
+            // let ropePerpVect = ptNormalized({ y: 1, x: -1 * ropeVect.y / ropeVect.x })
+
+            ctx.lineWidth = 4
+
+            // ctx.fillStyle = "#00AAAA" //turquoise
+            // renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
+            //player motion on circle proj vect point
+
+            
+            ctx.strokeStyle = "#AA00AA" //purple
+            drawLinePts(player, ptPlus(player, ptScalarMult(10, ropePerpVect)), ctx)
+            //ropePerpVect tangent line
+
+
+            ctx.strokeStyle = "#A00"; //red
+            drawLinePts(player, ptPlus(player, ptScalarMult(10, playerDesiredDelta)), ctx)
+            //orig player desired delta before rope
+
+
+            if (attemptedNewLength > ropeLength) {
+
+                // let theta = ptAtan2(player, nextPos);
+
+                //#todo projections
+
+                // nextPos.r -= attemptedNewLength - ropeLength
+                // nextPos.x -= lengthDelta * Math.cos(theta)
+                // nextPos.y -= lengthDelta * Math.sin(theta)
+
+                // console.log("p",player)
+                // console.log("a",anchorPt)
+                // console.log(ropeVect)
+                // console.log(ropePerpVect)
+                // console.log(ptProj(playerDesiredDelta, ropePerpVect))
+
+
+                let prj= ptProj(playerDesiredDelta, ropePerpVect)
+
+                let newPlayerDesiredDelta =ptNormalized(prj)
+                //  ptMag(prj)<3  ? ptScalarMult( ptMag(playerDesiredDelta), ropePerpVect) :
+                //     ptNormalized(prj)
+
+
+
+                newPlayerDesiredDelta = ptScalarMult(
+                    ptMag(playerDesiredDelta), newPlayerDesiredDelta)
+
+
+
+                // console.log( ptMag(playerDesiredDelta))
+                // let newPlayerDesiredDelta=ptProj(playerDesiredDelta,ropePerpVect)
+                // console.log(ropeTheta / Math.PI
+                // )
+
+                playerDesiredDelta = newPlayerDesiredDelta
+
+
+
+                // ctx.strokeStyle = "#0A0"; //green
+                // drawLinePts(player, ptPlus(player, ptScalarMult(10, newPlayerDesiredDelta)), ctx)
+
+
+
+            }
+            // player
+            // nextPos = 
+        }
+
+
+        ctx.lineWidth = 4
+        ctx.strokeStyle = "#00AAAA" //turquoise
+        drawLinePts(player, ptPlus(player, ptScalarMult(10, playerDesiredDelta)), ctx)
+        //player desired motion proj vect line
+
+        nextPos = ptPlus(player, playerDesiredDelta)
+
+
+
+        //splitting this achieves frictionless surface sliding
+        if (checkMoveIsLegal({ x: nextPos.x, y: player.y })) { //check new x
+
+            // if (powerCharge > 0 || allValsFalse(controlKeys))
+            // if (powerCharge > 0 || allValsFalse(controlKeys))
+            // playerVel.x = Math.max(0, nextPos.x - player.x)
+
+            powerCharge -= Math.abs(playerDesiredDelta.x)
+            player.x = nextPos.x
+
+
+        }
+        else {
+            tension += 1
+            playerVel.x *= -1
+        }
+
+        if (checkMoveIsLegal({ x: player.x, y: nextPos.y })) { //check new y
+            // if (powerCharge > 0 || allValsFalse(controlKeys))
+            // playerVel.y = Math.max(0, nextPos.y - player.y)
+
+            powerCharge -= Math.abs(playerDesiredDelta.y)
+            player.y = nextPos.y
+        }
+        else {
+            tension += 1
+            playerVel.y *= -1
+
+        }
+
+        const CHARGE_TENSION_MULTIPLIER = 3
+        powerCharge += CHARGE_TENSION_MULTIPLIER * tension
+
+
+        objs.forEach((o, i) => {
+            o.y -= 10;
+            if (o.y < 0) { //delete bullet if it's off screen
+                // debugger
+                objs.splice(i, 1)
+
+            }
+            // delete objs[i]
+        })
+
+        // enems.forEach((o, i) => {
+        //     if (o.x >= 350 && o.dir == 1) {
+        //         o.dir = -1
+        //         o.y += 15
+        //         // debugger
+        //     }
+        //     else if (o.x <= 0 && o.dir == -1) {
+        //         o.dir = 1
+        //         o.y += 15
+        //     }
+
+
+
+        //     o.x += 5 * o.dir;
+
+        //     // if(o.x>400) { 
+        //     //     enems.splice(i,1)
+
+        //     // }
+        // })
+
+
+
+        setTimeout(() => {
+            nextTurn()
+
+        }
+            ,
+            15
+        )
+    }
+
+    nextTurn()
 
 })

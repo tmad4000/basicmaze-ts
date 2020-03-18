@@ -1,3 +1,4 @@
+import 'bootstrap';
 import './vendor';
 import $ from 'jquery';
 import _ from 'lodash';
@@ -20,6 +21,8 @@ if (true) {
 
 type Point2D = { x: number, y: number }
 type IdxPair = { i: number, j: number }
+
+const genZeroVector = () => ({ x: 0, y: 0 }) //#util
 
 
 function getMousePosition(canvas, event): Point2D {
@@ -140,34 +143,40 @@ $(function () {
 
     }
 
-    function renderCenteredRect(ctrPt: Point2D, radiusWidth: number, ctx: CanvasRenderingContext2D) {
+    function drawCenteredRect(ctrPt: Point2D, radiusWidth: number, ctx: CanvasRenderingContext2D) {
         // ctx.clearRect(0, 0, 400, 400)
         // ctx.fillStyle = "#000000";
         // ctx.fillRect(ctrPt.x,ctrPt.x,ctrPt.x,ctrPt.x)
         ctx.fillRect(ctrPt.x - radiusWidth, ctrPt.y - radiusWidth, 2 * radiusWidth, 2 * radiusWidth);
     }
 
-    function drawLinePts(p1: Point2D, p2: Point2D, ctx: CanvasRenderingContext2D) {
+    function drawLinePts(p1: Point2D, p2: Point2D, ctx: CanvasRenderingContext2D, offset: Point2D = { x: 0, y: 0 }) {
+
         ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
+        ctx.moveTo(offset.x + p1.x, offset.y + p1.y);
+        ctx.lineTo(offset.x + p2.x, offset.y + p2.y);
         ctx.stroke();
+
+
     }
 
-    let drawAxesAndAngles = (p: Point2D, theta: number, ctx: CanvasRenderingContext2D) => {
+    let drawAxesAndAngles = (p: Point2D, theta: number, ctx: CanvasRenderingContext2D, offset: Point2D = { x: 0, y: 0 }) => {
+        let oldC: any = {}
+        oldC.strokeStyle = ctx.strokeStyle
+        oldC.lineWidth = ctx.lineWidth
 
         ctx.strokeStyle = "#000"
         ctx.lineWidth = 1
 
         const L = 40
         ctx.beginPath();
-        ctx.moveTo(p.x - L, p.y);
-        ctx.lineTo(p.x + L, p.y);
+        ctx.moveTo(offset.x + p.x - L, offset.y + p.y);
+        ctx.lineTo(offset.x + p.x + L, offset.y + p.y);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(p.x, p.y - L);
-        ctx.lineTo(p.x, p.y + L);
+        ctx.moveTo(offset.x + p.x, offset.y + p.y - L);
+        ctx.lineTo(offset.x + p.x, offset.y + p.y + L);
         ctx.stroke();
 
 
@@ -176,19 +185,20 @@ $(function () {
 
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, O, 0, theta);
+        ctx.arc(offset.x + p.x, offset.y + p.y, O, 0, theta);
         ctx.stroke();
 
         ctx.strokeStyle = "#F00"
         ctx.lineWidth = 2
         ctx.beginPath();
-        ctx.arc(p.x, p.y, O, 0, Math.PI / 8);
+        ctx.arc(offset.x + p.x, offset.y + p.y, O, 0, Math.PI / 8);
         ctx.stroke();
 
 
         // ctx.strokeStyle = "#0F0"
         // ctx.ellipse(p.x, p.y, 3, 3, 0, 0, 2 * Math.PI);
-
+        ctx.strokeStyle = oldC.strokeStyle
+        ctx.lineWidth = oldC.lineWidth
     }
 
 
@@ -375,7 +385,7 @@ $(function () {
         //render anchor point
         if (isMouseDown && anchorPt !== null) {
             ctx.fillStyle = "#00AA00";  //green
-            renderCenteredRect(anchorPt, 10, ctx);
+            drawCenteredRect(anchorPt, 10, ctx);
 
 
 
@@ -388,6 +398,8 @@ $(function () {
     }
 
     // renderCanv()
+
+    let tt = 0;
 
     let nextTurn = () => {
 
@@ -470,6 +482,13 @@ $(function () {
             }
         }
 
+        let ptFromPolar = (pp: PolarPoint2D): Point2D => {
+            return {
+                x: pp.r * Math.cos(pp.theta),
+                y: pp.r * Math.sin(pp.theta)
+            }
+        }
+
         let ptMinus = (p1: Point2D, p2: Point2D): Point2D => {
             return { x: p1.x - p2.x, y: p1.y - p2.y }
         }
@@ -491,7 +510,7 @@ $(function () {
         }
 
         let ptProjScal = (v: Point2D, base: Point2D): number => {
-            return ptDotP(v, base) / (ptMag(base)*ptMag(base))
+            return ptDotP(v, base) / (ptMag(base) * ptMag(base))
         }
 
         let ptProj = (v: Point2D, base: Point2D): Point2D => {
@@ -512,20 +531,40 @@ $(function () {
         // }
 
 
-        ctx.strokeStyle = "violet"
+        ctx.strokeStyle = "black"
         ctx.lineWidth = 5
 
-        let tt=0;
-        tt+=.01
-        let r=10
+        tt += .5 / 20
+        let r = 60
+        const OFFS = { x: 100, y: 100 }
 
-        let vv1={x:r*Math.cos(tt), y:r*Math.sin(tt)}
-        drawLinePts({x:0,y:0},vv1,ctx)
 
+        let vv1 = { x: r * Math.cos(tt), y: r * Math.sin(tt) }
+        drawLinePts(genZeroVector(), vv1, ctx, OFFS)
+
+        drawAxesAndAngles(genZeroVector(), ptAtan2(genZeroVector(), vv1), ctx, OFFS)
+
+
+        ctx.strokeStyle = "black"
+        ctx.lineWidth = 5
+
+        
+        let vv2 = ptFromPolar({ r: 100, theta: 1 })
+        drawLinePts(genZeroVector(), vv2, ctx, OFFS)
+
+        let proj12 = ptProj(vv1,vv2)
+
+        ctx.strokeStyle = "red"
+
+        drawLinePts(genZeroVector(), proj12, ctx, OFFS)
+
+
+
+        // ptProj
 
         if (isMouseDown) {
             // ctx.fillStyle = "#0000FF"
-            // renderCenteredRect(nextPos, 2, ctx)
+            // drawCenteredRect(nextPos, 2, ctx)
 
 
             let ropeLength = ptDist(anchorPt, player)
@@ -555,10 +594,10 @@ $(function () {
             ctx.lineWidth = 4
 
             // ctx.fillStyle = "#00AAAA" //turquoise
-            // renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
+            // drawCente    xredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
             //player motion on circle proj vect point
 
-            
+
             ctx.strokeStyle = "#AA00AA" //purple
             drawLinePts(player, ptPlus(player, ptScalarMult(10, ropePerpVect)), ctx)
             //ropePerpVect tangent line
@@ -585,8 +624,8 @@ $(function () {
                 // console.log(ropePerpVect)
                 // console.log(ptProj(playerDesiredDelta, ropePerpVect))
 
-// debugger
-                let prj= ptProj(playerDesiredDelta, ropePerpVect)
+                // debugger
+                let prj = ptProj(playerDesiredDelta, ropePerpVect)
 
                 let newPlayerDesiredDelta = ptNormalized(prj)
                 //  ptMag(prj)<3  ? ptScalarMult( ptMag(playerDesiredDelta), ropePerpVect) :

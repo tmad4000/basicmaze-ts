@@ -319,7 +319,7 @@ $(function () {
 
     }, false);
 
-    window.addEventListener('mousedown', function (evt) {
+    canv.addEventListener('mousedown', function (evt) {
         isMouseDown = true
     })
     window.addEventListener('mouseup', function (evt) {

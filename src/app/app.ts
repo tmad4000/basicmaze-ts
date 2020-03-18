@@ -1,15 +1,15 @@
-import 'bootstrap';
+// import 'bootstrap';
 import './vendor';
 import $ from 'jquery';
 import _ from 'lodash';
 import { countChanges } from 'jest-diff/build/printDiffs';
 
-const a = 1;
+// const a = 1;
 // c onsole.log($, '');
 
 
-if (true) {
-}
+// if (true) {
+// }
 
 // alert(
 //     document.getElementById("bootn").innerHTML)
@@ -314,7 +314,7 @@ $(function () {
 
         // c onsole.log(evt.clientX + ',' + evt.clientY);
         // alert(evt.clientX + ',' + evt.clientY);
-        renderCanv()
+        // renderCanv()
 
 
     }, false);
@@ -348,11 +348,39 @@ $(function () {
         // lastClientX = evt.clientX
         // lastClientY = evt.clientY
 
-        renderCanv()
+        // renderCanv()
 
     }, false);
 
 
+
+    //#Test2
+    let tt = 0;
+    let tt2 = 0;
+
+    let vv1Theta = 0;
+    let vv2Theta = 0;
+
+    var sliderVv1: any = document.getElementById("rotManipVv1");
+    var outputVv1 = document.getElementById("outputVv1");
+
+    var sliderVv2: any = document.getElementById("rotManipVv2");
+    var outputVv2 = document.getElementById("outputVv2");
+ 
+    outputVv1.innerHTML = sliderVv1.value; // Display the default sliderVv1 value
+    outputVv2.innerHTML = sliderVv2.value; // Display the default sliderVv1 value
+    vv1Theta = sliderVv1.value
+    vv2Theta = sliderVv2.value
+
+    // Update the current sliderVv1 value (each time you drag the sliderVv1 handle)
+    sliderVv1.oninput = function () {
+        outputVv1.innerHTML = this.value;
+        vv1Theta = this.value;
+    }
+    sliderVv2.oninput = function () {
+        outputVv2.innerHTML = this.value;
+        vv2Theta = this.value;
+    }
 
 
     let renderCanv = () => {
@@ -399,7 +427,6 @@ $(function () {
 
     // renderCanv()
 
-    let tt = 0;
 
     let nextTurn = () => {
 
@@ -535,6 +562,10 @@ $(function () {
         ctx.lineWidth = 5
 
         tt += .5 / 20
+
+        tt = vv1Theta / 360 * 2 * Math.PI
+        tt2 = vv2Theta / 360 * 2 * Math.PI
+
         let r = 60
         const OFFS = { x: 100, y: 100 }
 
@@ -545,18 +576,32 @@ $(function () {
         drawAxesAndAngles(genZeroVector(), ptAtan2(genZeroVector(), vv1), ctx, OFFS)
 
 
-        ctx.strokeStyle = "black"
+        ctx.strokeStyle = "gray"
         ctx.lineWidth = 5
 
-        
-        let vv2 = ptFromPolar({ r: 100, theta: 1 })
+
+        let vv2 = ptFromPolar({ r: 100, theta: tt2 })
         drawLinePts(genZeroVector(), vv2, ctx, OFFS)
 
-        let proj12 = ptProj(vv1,vv2)
+        let proj12 = ptProj(vv1, vv2)
 
         ctx.strokeStyle = "red"
 
         drawLinePts(genZeroVector(), proj12, ctx, OFFS)
+
+        drawLinePts(vv1, proj12, ctx, OFFS)
+
+        let proj12Unit=ptNormalized(proj12)
+        let vv1Unit=ptNormalized(vv1)
+
+        let proj12Shift10=ptMinus(proj12, ptScalarMult(10, proj12Unit))
+
+        drawLinePts( ptMinus(vv1, ptScalarMult(10, proj12Unit)), proj12Shift10, ctx, OFFS)
+
+        // drawLinePts( ptMinus(vv1, ptScalarMult(10, proj12Unit)), proj12Shift10, ctx, OFFS)
+
+
+        ctx.fillRect
 
 
 

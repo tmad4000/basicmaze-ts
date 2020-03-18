@@ -20,12 +20,17 @@
     
   </div> -->
 
-    <br>
+    <!-- <br> -->
     <form>
       <div class="form-group">
-        <label for="formControlRange">Example Range input</label>
-        <input type="range" class="form-control-range" id="formControlRange">
+        <label for="rotManipVv1">Vector 1 Theta</label>
+        <input type="range" class="form-control-range" id="rotManipVv1" min="-360" max="360" value="50">
+        <br>
+        <label for="rotManipVv2">Vector 2 Theta</label>
+        <input type="range" class="form-control-range" id="rotManipVv2" min="-360" max="360" value="0">
       </div>
+      <div id="outputVv1"></div>
+      <div id="outputVv2"></div>
     </form>
     <hr>
     <canvas id="myCanvas" width="800" height="800" style="border:1px solid #d3d3d3;">

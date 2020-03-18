@@ -523,7 +523,7 @@ let nextTurn = () => {
 
         let ropeVect = ptMinus(player, anchorPt)
 
-        let ropeTheta = ptAtan2(player, anchorPt);
+        let ropeTheta = ptAtan2(anchorPt, player);
 
         drawAxesAndAngles(anchorPt, ropeTheta, ctx)
 
@@ -543,9 +543,10 @@ let nextTurn = () => {
 
         ctx.lineWidth = 4
 
-        ctx.fillStyle = "#00AAAA"
+        ctx.fillStyle = "#00AAAA" //green
         renderCenteredRect(ptPlus(player, ptScalarMult(10, ropePerpVect)), 2, ctx)
-        ctx.strokeStyle = "#00AAAA"
+
+        ctx.strokeStyle = "#00AAAA" //green
         drawLinePts(player, ptPlus(player, ptScalarMult(10, ropePerpVect)), ctx)
 
 
